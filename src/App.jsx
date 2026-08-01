@@ -258,7 +258,6 @@ export default function App() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <UrlDisplay 
                 generatedUrl={generatedUrl} 
-                justWatchUrl={justWatchUrl} 
                 copied={copied} 
                 onCopy={handleCopy} 
                 onSaveSearch={handleSaveSearch} 
