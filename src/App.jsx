@@ -154,17 +154,20 @@ export default function App() {
     // 5. Sort Order
     params.set('sort', config.sortBy);
 
-    // 6. Watch Providers (online_availability parameter)
-    const watchProviders = [];
-    if (config.primeIndia) watchProviders.push('IN/today/Amazon/subs');
-    if (config.primeUK) watchProviders.push('GB/today/Amazon/subs');
-    if (watchProviders.length > 0) {
-      params.set('online_availability', watchProviders.join(','));
+    // 6. Watch Providers (online_availability parameter takes single region value)
+    if (config.primeIndia) {
+      params.set('online_availability', 'IN/today/Amazon/subs');
+    } else if (config.primeUK) {
+      params.set('online_availability', 'GB/today/Amazon/subs');
     }
 
-    // 7. Adult Titles Option (exclude vs include)
-    if (config.adultMode) {
-      params.set('adult', config.adultMode);
+    // 7. Adult Titles Option (IMDb uses genre 'adult' in genres= parameter, no adult= query param)
+    if (config.adultMode === 'include') {
+      const currentGenres = params.get('genres') ? params.get('genres').split(',') : [];
+      if (!currentGenres.includes('adult')) {
+        currentGenres.push('adult');
+      }
+      params.set('genres', currentGenres.join(','));
     }
 
     return `https://www.imdb.com/search/title/?${params.toString()}`;
