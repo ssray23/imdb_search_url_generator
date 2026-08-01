@@ -53,6 +53,16 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // Heartbeat to automatically shut down server when browser tab is closed
+  useEffect(() => {
+    const sendHeartbeat = () => {
+      fetch('/__heartbeat').catch(() => {});
+    };
+    sendHeartbeat();
+    const interval = setInterval(sendHeartbeat, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Persist history
   useEffect(() => {
     try {
