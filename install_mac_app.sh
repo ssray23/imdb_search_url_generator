@@ -2,43 +2,41 @@
 set -e
 
 APP_NAME="IMDb Search URL Generator.app"
-BUILD_DIR="./build_app"
-ICON_SRC="clean_icon.png"
+TEMP_BUILD_DIR="/tmp/imdb_app_build"
+ICON_SRC="public/favicon.png"
+
+echo "Setting up temporary build directory at $TEMP_BUILD_DIR..."
+rm -rf "$TEMP_BUILD_DIR"
+mkdir -p "$TEMP_BUILD_DIR"
 
 echo "Building Swift launcher executable..."
-swiftc launcher.swift -o "IMDb Search Generator"
+swiftc launcher.swift -o "$TEMP_BUILD_DIR/IMDb Search Generator"
 
-echo "Copying browser favicon..."
-mkdir -p public
-cp "$ICON_SRC" public/favicon.png
+echo "Generating macOS AppIcon.icns in temporary directory..."
+mkdir -p "$TEMP_BUILD_DIR/AppIcon.iconset"
 
-echo "Generating macOS AppIcon.icns..."
-rm -rf AppIcon.iconset AppIcon.icns
-mkdir -p AppIcon.iconset
+sips -s format png -z 16 16     "$ICON_SRC" --out "$TEMP_BUILD_DIR/AppIcon.iconset/icon_16x16.png" > /dev/null 2>&1
+sips -s format png -z 32 32     "$ICON_SRC" --out "$TEMP_BUILD_DIR/AppIcon.iconset/icon_16x16@2x.png" > /dev/null 2>&1
+sips -s format png -z 32 32     "$ICON_SRC" --out "$TEMP_BUILD_DIR/AppIcon.iconset/icon_32x32.png" > /dev/null 2>&1
+sips -s format png -z 64 64     "$ICON_SRC" --out "$TEMP_BUILD_DIR/AppIcon.iconset/icon_32x32@2x.png" > /dev/null 2>&1
+sips -s format png -z 128 128   "$ICON_SRC" --out "$TEMP_BUILD_DIR/AppIcon.iconset/icon_128x128.png" > /dev/null 2>&1
+sips -s format png -z 256 256   "$ICON_SRC" --out "$TEMP_BUILD_DIR/AppIcon.iconset/icon_128x128@2x.png" > /dev/null 2>&1
+sips -s format png -z 256 256   "$ICON_SRC" --out "$TEMP_BUILD_DIR/AppIcon.iconset/icon_256x256.png" > /dev/null 2>&1
+sips -s format png -z 512 512   "$ICON_SRC" --out "$TEMP_BUILD_DIR/AppIcon.iconset/icon_256x256@2x.png" > /dev/null 2>&1
+sips -s format png -z 512 512   "$ICON_SRC" --out "$TEMP_BUILD_DIR/AppIcon.iconset/icon_512x512.png" > /dev/null 2>&1
+sips -s format png -z 1024 1024 "$ICON_SRC" --out "$TEMP_BUILD_DIR/AppIcon.iconset/icon_512x512@2x.png" > /dev/null 2>&1
 
-sips -s format png -z 16 16     "$ICON_SRC" --out AppIcon.iconset/icon_16x16.png > /dev/null 2>&1
-sips -s format png -z 32 32     "$ICON_SRC" --out AppIcon.iconset/icon_16x16@2x.png > /dev/null 2>&1
-sips -s format png -z 32 32     "$ICON_SRC" --out AppIcon.iconset/icon_32x32.png > /dev/null 2>&1
-sips -s format png -z 64 64     "$ICON_SRC" --out AppIcon.iconset/icon_32x32@2x.png > /dev/null 2>&1
-sips -s format png -z 128 128   "$ICON_SRC" --out AppIcon.iconset/icon_128x128.png > /dev/null 2>&1
-sips -s format png -z 256 256   "$ICON_SRC" --out AppIcon.iconset/icon_128x128@2x.png > /dev/null 2>&1
-sips -s format png -z 256 256   "$ICON_SRC" --out AppIcon.iconset/icon_256x256.png > /dev/null 2>&1
-sips -s format png -z 512 512   "$ICON_SRC" --out AppIcon.iconset/icon_256x256@2x.png > /dev/null 2>&1
-sips -s format png -z 512 512   "$ICON_SRC" --out AppIcon.iconset/icon_512x512.png > /dev/null 2>&1
-sips -s format png -z 1024 1024 "$ICON_SRC" --out AppIcon.iconset/icon_512x512@2x.png > /dev/null 2>&1
+iconutil -c icns "$TEMP_BUILD_DIR/AppIcon.iconset" -o "$TEMP_BUILD_DIR/AppIcon.icns"
+rm -rf "$TEMP_BUILD_DIR/AppIcon.iconset"
 
-iconutil -c icns AppIcon.iconset -o AppIcon.icns
-rm -rf AppIcon.iconset
+echo "Creating App Bundle structure in temporary directory..."
+mkdir -p "$TEMP_BUILD_DIR/$APP_NAME/Contents/MacOS"
+mkdir -p "$TEMP_BUILD_DIR/$APP_NAME/Contents/Resources"
 
-echo "Creating App Bundle structure..."
-rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR/$APP_NAME/Contents/MacOS"
-mkdir -p "$BUILD_DIR/$APP_NAME/Contents/Resources"
+cp "$TEMP_BUILD_DIR/IMDb Search Generator" "$TEMP_BUILD_DIR/$APP_NAME/Contents/MacOS/"
+cp "$TEMP_BUILD_DIR/AppIcon.icns" "$TEMP_BUILD_DIR/$APP_NAME/Contents/Resources/"
 
-cp "IMDb Search Generator" "$BUILD_DIR/$APP_NAME/Contents/MacOS/"
-cp AppIcon.icns "$BUILD_DIR/$APP_NAME/Contents/Resources/"
-
-cat << 'EOF' > "$BUILD_DIR/$APP_NAME/Contents/Info.plist"
+cat << 'EOF' > "$TEMP_BUILD_DIR/$APP_NAME/Contents/Info.plist"
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -65,14 +63,18 @@ cat << 'EOF' > "$BUILD_DIR/$APP_NAME/Contents/Info.plist"
 </plist>
 EOF
 
-chmod +x "$BUILD_DIR/$APP_NAME/Contents/MacOS/IMDb Search Generator"
+chmod +x "$TEMP_BUILD_DIR/$APP_NAME/Contents/MacOS/IMDb Search Generator"
 
-echo "Installing to Applications folder..."
+echo "Installing compiled application directly to $HOME/Applications/..."
 mkdir -p "$HOME/Applications"
 rm -rf "$HOME/Applications/$APP_NAME"
-cp -R "$BUILD_DIR/$APP_NAME" "$HOME/Applications/"
+cp -R "$TEMP_BUILD_DIR/$APP_NAME" "$HOME/Applications/"
 
-# Force Finder icon cache refresh
+# Refresh Finder icon cache
 touch "$HOME/Applications/$APP_NAME"
 
-echo "Successfully installed $APP_NAME with clean transparent IMDb icon to $HOME/Applications!"
+# Cleanup temporary build files
+rm -rf "$TEMP_BUILD_DIR"
+
+echo "Successfully installed $APP_NAME to $HOME/Applications!"
+echo "Project folder remains 100% clean source code only."
