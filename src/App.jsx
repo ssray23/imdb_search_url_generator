@@ -121,9 +121,10 @@ export default function App() {
       }
     });
 
-    // Set official genres parameter (with !documentary,!short)
-    const genresList = [...officialSelected, '!documentary', '!short'];
-    params.set('genres', genresList.join(','));
+    // Set official genres parameter (only positive official genres)
+    if (officialSelected.length > 0) {
+      params.set('genres', Array.from(new Set(officialSelected)).join(','));
+    }
 
     // Set plot keywords parameter if any custom keywords exist
     if (extraKeywords.length > 0) {
