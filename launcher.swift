@@ -5,6 +5,23 @@ let projectDir = "/Users/suddharay/Library/Mobile Documents/com~apple~CloudDocs/
 let targetPort = 5173
 let targetUrlString = "http://localhost:\(targetPort)"
 
+// Helper to find npm path across standard macOS install locations
+func findNpmPath() -> String {
+    let candidatePaths = [
+        "/opt/homebrew/bin/npm",
+        "/usr/local/bin/npm",
+        "/usr/bin/npm",
+        "/bin/npm"
+    ]
+    for path in candidatePaths {
+        if FileManager.default.fileExists(atPath: path) {
+            return path
+        }
+    }
+    return "npm"
+}
+
+// Check if port 5173 is active
 func isPortActive() -> Bool {
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/usr/bin/lsof")
@@ -21,6 +38,7 @@ func isPortActive() -> Bool {
     }
 }
 
+// Check if default browser is currently running
 func isDefaultBrowserRunning() -> Bool {
     guard let defaultBrowserURL = NSWorkspace.shared.urlForApplication(toOpen: URL(string: "http://localhost")!) else {
         return false
@@ -34,10 +52,18 @@ func isDefaultBrowserRunning() -> Bool {
 let browserWasAlreadyRunning = isDefaultBrowserRunning()
 
 if !isPortActive() {
+    let npmPath = findNpmPath()
     let task = Process()
-    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-    task.arguments = ["npm", "run", "dev"]
+    task.executableURL = URL(fileURLWithPath: npmPath)
+    task.arguments = ["run", "dev"]
     task.currentDirectoryURL = URL(fileURLWithPath: projectDir)
+    
+    // Set PATH environment variable so node and npm can be found by GUI app
+    var env = ProcessInfo.processInfo.environment
+    let extraPath = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    env["PATH"] = "\(extraPath):\(env["PATH"] ?? "")"
+    task.environment = env
+
     do {
         try task.run()
     } catch {
@@ -53,7 +79,7 @@ if !isPortActive() {
 }
 
 if let url = URL(string: targetUrlString) {
-    // Open URL in default browser
+    // Open URL in default browser in a new tab
     NSWorkspace.shared.open(url)
     
     // Cold launch check
