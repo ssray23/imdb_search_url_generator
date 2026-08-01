@@ -319,31 +319,6 @@ export default function SearchForm({ config, onChange, onApplyPresetYear }) {
           </label>
         </div>
       </div>
-
-      {/* 7. Adult Titles */}
-      <div className="mac-card">
-        <div className="card-title">
-          <ShieldAlert size={14} /> Adult Titles
-        </div>
-        <div className="form-group">
-          <div className="segmented-control">
-            <button
-              type="button"
-              className={`segmented-option ${config.adultMode === 'exclude' ? 'active' : ''}`}
-              onClick={() => onChange({ adultMode: 'exclude' })}
-            >
-              🚫 Exclude
-            </button>
-            <button
-              type="button"
-              className={`segmented-option ${config.adultMode === 'include' ? 'active' : ''}`}
-              onClick={() => onChange({ adultMode: 'include' })}
-            >
-              🔞 Include
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

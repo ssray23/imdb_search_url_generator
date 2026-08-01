@@ -22,8 +22,7 @@ const DEFAULT_CONFIG = {
   yearTo: '',
   sortBy: 'num_votes,desc', // Default popularity
   primeIndia: false,
-  primeUK: false,
-  adultMode: 'exclude' // 'exclude' or 'include'
+  primeUK: false
 };
 
 export default function App() {
@@ -161,15 +160,6 @@ export default function App() {
       params.set('online_availability', 'GB/today/Amazon/subs');
     }
 
-    // 7. Adult Titles Option (IMDb uses genre 'adult' in genres= parameter, no adult= query param)
-    if (config.adultMode === 'include') {
-      const currentGenres = params.get('genres') ? params.get('genres').split(',') : [];
-      if (!currentGenres.includes('adult')) {
-        currentGenres.push('adult');
-      }
-      params.set('genres', currentGenres.join(','));
-    }
-
     return `https://www.imdb.com/search/title/?${params.toString()}`;
   }, [config]);
 
@@ -220,9 +210,8 @@ export default function App() {
     if (cfg.primeIndia) watch.push('Prime IN 🇮🇳');
     if (cfg.primeUK) watch.push('Prime UK 🇬🇧');
     const watchLabel = watch.length ? ` [${watch.join(', ')}]` : '';
-    const adultLabel = cfg.adultMode === 'include' ? ' [Adult Included]' : '';
 
-    return `${lang} ${genres} ${fmt}${keywords}${years}${watchLabel}${adultLabel}`.replace(/\s+/g, ' ').trim();
+    return `${lang} ${genres} ${fmt}${keywords}${years}${watchLabel}`.replace(/\s+/g, ' ').trim();
   };
 
   // Save current search to local history
