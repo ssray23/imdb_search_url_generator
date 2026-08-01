@@ -3,7 +3,7 @@ import Cocoa
 
 let projectDir = "/Users/suddharay/Library/Mobile Documents/com~apple~CloudDocs/Mac Projects/IMDB Search URL Generator"
 let targetPort = 5173
-let targetUrlString = "http://localhost:\(targetPort)"
+let targetUrlString = "http://127.0.0.1:\(targetPort)"
 
 // Helper to find npm path across standard macOS install locations
 func findNpmPath() -> String {
@@ -38,19 +38,22 @@ func isPortActive() -> Bool {
     }
 }
 
-// Check if default browser is currently running
-func isDefaultBrowserRunning() -> Bool {
-    guard let defaultBrowserURL = NSWorkspace.shared.urlForApplication(toOpen: URL(string: "http://localhost")!) else {
-        return false
-    }
-    let runningApps = NSWorkspace.shared.runningApplications
-    return runningApps.contains { app in
-        app.bundleURL == defaultBrowserURL
+// Open URL in system default browser using macOS 'open' binary
+func openInDefaultBrowser(url: String) {
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+    task.arguments = [url]
+    do {
+        try task.run()
+        task.waitUntilExit()
+    } catch {
+        if let u = URL(string: url) {
+            NSWorkspace.shared.open(u)
+        }
     }
 }
 
-let browserWasAlreadyRunning = isDefaultBrowserRunning()
-
+// Start Vite server if port 5173 is not active
 if !isPortActive() {
     let npmPath = findNpmPath()
     let task = Process()
@@ -78,13 +81,5 @@ if !isPortActive() {
     }
 }
 
-if let url = URL(string: targetUrlString) {
-    // Open URL in default browser in a new tab
-    NSWorkspace.shared.open(url)
-    
-    // Cold launch check
-    if !browserWasAlreadyRunning {
-        Thread.sleep(forTimeInterval: 1.2)
-        NSWorkspace.shared.open(url)
-    }
-}
+// Open web application in browser tab
+openInDefaultBrowser(url: targetUrlString)
