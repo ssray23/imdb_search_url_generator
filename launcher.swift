@@ -56,19 +56,21 @@ func openInDefaultBrowser(url: String) {
 // Start Vite server if port 5173 is not active
 if !isPortActive() {
     let npmPath = findNpmPath()
-    let task = Process()
-    task.executableURL = URL(fileURLWithPath: npmPath)
-    task.arguments = ["run", "dev"]
-    task.currentDirectoryURL = URL(fileURLWithPath: projectDir)
     
-    // Set PATH environment variable so node and npm can be found by GUI app
-    var env = ProcessInfo.processInfo.environment
-    let extraPath = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    env["PATH"] = "\(extraPath):\(env["PATH"] ?? "")"
-    task.environment = env
-
+    // Use nohup and & to detach the node process from the Swift launcher's process group.
+    // This prevents macOS LaunchServices from killing the server when the .app finishes executing!
+    let script = """
+    cd "\(projectDir)"
+    export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+    nohup "\(npmPath)" run dev > /tmp/imdb_search_generator.log 2>&1 &
+    """
+    
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: "/bin/sh")
+    task.arguments = ["-c", script]
     do {
         try task.run()
+        task.waitUntilExit()
     } catch {
         print("Failed to start server: \(error)")
     }
