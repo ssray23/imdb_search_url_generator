@@ -113,7 +113,6 @@ export default function SearchForm({ config, onChange, onApplyPresetYear }) {
           <Film size={14} /> Title Format & Exclusions
         </div>
         <div className="form-group">
-          <label className="form-label">Format Type:</label>
           <div className="segmented-control">
             <button
               type="button"
@@ -254,7 +253,50 @@ export default function SearchForm({ config, onChange, onApplyPresetYear }) {
         </div>
       </div>
 
-      {/* 5. Sort By Option */}
+      {/* 5. Instant Watch Options */}
+      <div className="mac-card">
+        <div className="card-title">
+          <Tv size={14} /> Instant Watch Options
+        </div>
+        <div className="form-group">
+          <div className="chips-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            {[
+              { id: 'US/today/Amazon/subs', label: 'US Prime Video (Free)' },
+              { id: 'GB/today/Amazon/subs', label: 'UK Prime Video (Free)' },
+              { id: 'US/today/Amazon/paid', label: 'US Prime (Rent or Buy)' },
+              { id: 'GB/today/Amazon/paid', label: 'UK Prime (Rent or Buy)' }
+            ].map((opt) => {
+              const isSelected = (config.onlineAvailability || []).includes(opt.id);
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  className={`genre-chip ${isSelected ? 'active' : ''}`}
+                  onClick={() => {
+                    const current = config.onlineAvailability || [];
+                    const updated = isSelected 
+                      ? current.filter(id => id !== opt.id)
+                      : [...current, opt.id];
+                    onChange({ onlineAvailability: updated });
+                  }}
+                >
+                  {isSelected ? (
+                    <Check size={12} strokeWidth={2.8} />
+                  ) : (
+                    <span style={{ fontSize: '12px', fontWeight: 600 }}>+</span>
+                  )}
+                  <span>{opt.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <span className="sublabel" style={{ marginTop: '10px', display: 'block' }}>
+            Select multiple regions or availability types on Amazon Prime
+          </span>
+        </div>
+      </div>
+
+      {/* 6. Sort By Option */}
       <div className="mac-card">
         <div className="card-title">
           <ArrowUpDown size={14} /> Default Sort Order

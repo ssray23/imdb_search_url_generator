@@ -20,7 +20,8 @@ const DEFAULT_CONFIG = {
   customKeywords: [], // Custom keywords
   yearFrom: '',
   yearTo: '',
-  sortBy: 'num_votes,desc' // Default popularity
+  sortBy: 'num_votes,desc', // Default popularity
+  onlineAvailability: [] // Instant watch option
 };
 
 export default function App() {
@@ -161,7 +162,19 @@ export default function App() {
     // 5. Sort Order
     params.set('sort', config.sortBy);
 
-    return `https://www.imdb.com/search/title/?${params.toString()}`;
+    // 6. Online Availability
+    const avail = Array.isArray(config.onlineAvailability) 
+      ? config.onlineAvailability 
+      : (typeof config.onlineAvailability === 'string' && config.onlineAvailability)
+        ? [config.onlineAvailability] 
+        : [];
+        
+    if (avail.length > 0) {
+      params.set('online_availability', Array.from(new Set(avail)).join(','));
+    }
+
+    // IMDb prefers literal commas instead of %2C in their URLs for filters
+    return `https://www.imdb.com/search/title/?${params.toString().replace(/%2C/g, ',')}`;
   }, [config]);
 
   // Copy to Clipboard
@@ -199,7 +212,23 @@ export default function App() {
       ? ` (${cfg.yearFrom || ''}-${cfg.yearTo || ''})` 
       : '';
 
-    return `${lang} ${genres} ${fmt}${keywords}${years}`.replace(/\s+/g, ' ').trim();
+    let watchRegion = '';
+    const avail = Array.isArray(cfg.onlineAvailability) 
+      ? cfg.onlineAvailability 
+      : (typeof cfg.onlineAvailability === 'string' && cfg.onlineAvailability)
+        ? [cfg.onlineAvailability] 
+        : [];
+
+    if (avail.length > 0) {
+      const regions = [];
+      if (avail.some(o => o.includes('GB'))) regions.push('UK');
+      if (avail.some(o => o.includes('US'))) regions.push('US');
+      
+      if (regions.length > 0) watchRegion = ` [Watch: ${regions.join('+')}]`;
+      else watchRegion = ' [Stream]';
+    }
+
+    return `${lang} ${genres} ${fmt}${keywords}${years}${watchRegion}`.replace(/\s+/g, ' ').trim();
   };
 
   // Save current search to local history

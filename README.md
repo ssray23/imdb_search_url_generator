@@ -2,8 +2,6 @@
 
 An ultra-sleek, native Apple macOS System Settings styled web & desktop application designed to build precise, custom IMDb Advanced Search URLs. Filter movies and series effortlessly by language, format, custom plot keywords, release dates, adult content preferences, and streaming providers.
 
-![macOS Interface](public/favicon.png)
-
 ---
 
 ## ✨ Features
