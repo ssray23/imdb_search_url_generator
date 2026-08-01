@@ -153,12 +153,12 @@ export default function App() {
     // 5. Sort Order
     params.set('sort', config.sortBy);
 
-    // 6. Watch Providers (Amazon Prime IN & UK)
+    // 6. Watch Providers (online_availability parameter)
     const watchProviders = [];
-    if (config.primeIndia) watchProviders.push('in:amazon_prime');
-    if (config.primeUK) watchProviders.push('gb:amazon_prime');
+    if (config.primeIndia) watchProviders.push('IN/today/Amazon/subs');
+    if (config.primeUK) watchProviders.push('GB/today/Amazon/subs');
     if (watchProviders.length > 0) {
-      params.set('with_watch_providers', watchProviders.join(','));
+      params.set('online_availability', watchProviders.join(','));
     }
 
     // 7. Adult Titles Option (exclude vs include)
