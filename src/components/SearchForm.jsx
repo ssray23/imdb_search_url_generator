@@ -285,40 +285,6 @@ export default function SearchForm({ config, onChange, onApplyPresetYear }) {
           </div>
         </div>
       </div>
-
-      {/* 6. Instant Watch Options */}
-      <div className="mac-card">
-        <div className="card-title">
-          <Tv size={14} /> Instant Watch Options (Amazon Prime)
-        </div>
-        <div className="form-group" style={{ gap: '10px' }}>
-          <label className="mac-checkbox-container">
-            <div className={`mac-checkbox-box ${config.primeIndia ? 'checked' : ''}`}>
-              {config.primeIndia && <Check size={11} strokeWidth={3.2} style={{ color: '#ffffff' }} />}
-            </div>
-            <input
-              type="checkbox"
-              style={{ display: 'none' }}
-              checked={config.primeIndia}
-              onChange={(e) => onChange({ primeIndia: e.target.checked })}
-            />
-            <span>🇮🇳 Amazon Prime Video (India)</span>
-          </label>
-
-          <label className="mac-checkbox-container">
-            <div className={`mac-checkbox-box ${config.primeUK ? 'checked' : ''}`}>
-              {config.primeUK && <Check size={11} strokeWidth={3.2} style={{ color: '#ffffff' }} />}
-            </div>
-            <input
-              type="checkbox"
-              style={{ display: 'none' }}
-              checked={config.primeUK}
-              onChange={(e) => onChange({ primeUK: e.target.checked })}
-            />
-            <span>🇬🇧 Amazon Prime Video (UK)</span>
-          </label>
-        </div>
-      </div>
     </div>
   );
 }

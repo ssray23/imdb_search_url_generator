@@ -53,28 +53,6 @@ export default function UrlDisplay({
         >
           <Bookmark size={13} /> Save
         </button>
-
-        {justWatchUrl && (
-          <a
-            href={justWatchUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="preset-btn"
-            style={{ 
-              flex: 1, 
-              textDecoration: 'none', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '6px', 
-              padding: '7px 10px', 
-              whiteSpace: 'nowrap' 
-            }}
-            title="Alternative JustWatch link"
-          >
-            <Tv size={13} /> JustWatch
-          </a>
-        )}
       </div>
 
       {/* Code URL Box (Clickable link directly) */}

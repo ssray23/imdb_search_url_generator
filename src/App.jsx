@@ -20,9 +20,7 @@ const DEFAULT_CONFIG = {
   customKeywords: [], // Custom keywords
   yearFrom: '',
   yearTo: '',
-  sortBy: 'num_votes,desc', // Default popularity
-  primeIndia: false,
-  primeUK: false
+  sortBy: 'num_votes,desc' // Default popularity
 };
 
 export default function App() {
@@ -153,22 +151,7 @@ export default function App() {
     // 5. Sort Order
     params.set('sort', config.sortBy);
 
-    // 6. Watch Providers (online_availability parameter takes single region value)
-    if (config.primeIndia) {
-      params.set('online_availability', 'IN/today/Amazon/subs');
-    } else if (config.primeUK) {
-      params.set('online_availability', 'GB/today/Amazon/subs');
-    }
-
     return `https://www.imdb.com/search/title/?${params.toString()}`;
-  }, [config]);
-
-  // JustWatch fallback URL for streaming
-  const justWatchUrl = useMemo(() => {
-    if (!config.primeIndia && !config.primeUK) return null;
-    const country = config.primeIndia ? 'in' : 'uk';
-    const query = config.selectedGenres.join('+');
-    return `https://www.justwatch.com/${country}/provider/amazon-prime-video?genres=${query}`;
   }, [config]);
 
   // Copy to Clipboard
@@ -206,12 +189,7 @@ export default function App() {
       ? ` (${cfg.yearFrom || ''}-${cfg.yearTo || ''})` 
       : '';
 
-    const watch = [];
-    if (cfg.primeIndia) watch.push('Prime IN 🇮🇳');
-    if (cfg.primeUK) watch.push('Prime UK 🇬🇧');
-    const watchLabel = watch.length ? ` [${watch.join(', ')}]` : '';
-
-    return `${lang} ${genres} ${fmt}${keywords}${years}${watchLabel}`.replace(/\s+/g, ' ').trim();
+    return `${lang} ${genres} ${fmt}${keywords}${years}`.replace(/\s+/g, ' ').trim();
   };
 
   // Save current search to local history
